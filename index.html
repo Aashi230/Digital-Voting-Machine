@@ -1,0 +1,195 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Electra | Electronic Ballot System</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+
+    <header class="header">
+        <div class="brand">
+            <div class="logo">E</div>
+            <div>
+                <h1>Electra</h1>
+                <p>Electronic Ballot Management System</p>
+            </div>
+        </div>
+
+        <div class="status">
+            <span class="dot"></span> SYSTEM ONLINE
+        </div>
+    </header>
+
+    <main class="container">
+
+        <section class="welcome">
+            <p class="eyebrow">DIGITAL ELECTION PORTAL</p>
+            <h2>Cast Your Vote</h2>
+            <p>Select one candidate below to register your vote.</p>
+        </section>
+
+        <section class="stats">
+            <div class="stat-card">
+                <p>Total Votes</p>
+                <h2 id="total">0</h2>
+            </div>
+
+            <div class="stat-card">
+                <p>Election Status</p>
+                <h2 id="status">Ready</h2>
+            </div>
+        </section>
+
+        <section class="candidates">
+            <h3>Choose Your Candidate</h3>
+
+            <div class="candidate-grid">
+
+                <div class="candidate-card">
+                    <div class="avatar">A</div>
+                    <h3>Candidate A</h3>
+                    <p>Candidate 01</p>
+                    <button onclick="castVote('A')">Vote for A</button>
+                    <p class="count">Votes: <span id="count-A">0</span></p>
+                </div>
+
+                <div class="candidate-card">
+                    <div class="avatar">B</div>
+                    <h3>Candidate B</h3>
+                    <p>Candidate 02</p>
+                    <button onclick="castVote('B')">Vote for B</button>
+                    <p class="count">Votes: <span id="count-B">0</span></p>
+                </div>
+
+                <div class="candidate-card">
+                    <div class="avatar">C</div>
+                    <h3>Candidate C</h3>
+                    <p>Candidate 03</p>
+                    <button onclick="castVote('C')">Vote for C</button>
+                    <p class="count">Votes: <span id="count-C">0</span></p>
+                </div>
+
+                <div class="candidate-card">
+                    <div class="avatar">D</div>
+                    <h3>Candidate D</h3>
+                    <p>Candidate 04</p>
+                    <button onclick="castVote('D')">Vote for D</button>
+                    <p class="count">Votes: <span id="count-D">0</span></p>
+                </div>
+
+            </div>
+        </section>
+
+        <section class="result-card">
+            <p class="eyebrow">LIVE ELECTION RESULT</p>
+            <h2 id="winner">No votes yet</h2>
+            <p id="message">Waiting for votes...</p>
+        </section>
+
+        <div class="reset-area">
+            <button class="reset-btn" onclick="resetElection()">
+                Reset Election
+            </button>
+        </div>
+
+    </main>
+
+    <footer>
+        <p>Electra | Verilog-Based Digital Electronics Project</p>
+    </footer>
+
+    <script>
+
+        async function castVote(candidate) {
+            try {
+                const response = await fetch("/vote", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        candidate: candidate
+                    })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.error || "Vote failed");
+                }
+
+                updateDashboard(data);
+
+            } catch (error) {
+                alert("Error: " + error.message);
+            }
+        }
+
+        function updateDashboard(data) {
+
+            document.getElementById("total").textContent =
+                data.total_votes;
+
+            for (const candidate of ["A", "B", "C", "D"]) {
+                document.getElementById("count-" + candidate)
+                    .textContent = data.counts[candidate];
+            }
+
+            document.getElementById("winner").textContent =
+                data.winner;
+
+            document.getElementById("status").textContent =
+                data.total_votes > 0 ? "Active" : "Ready";
+
+            document.getElementById("message").textContent =
+                data.tie
+                ? "Tie detected between candidates."
+                : data.total_votes > 0
+                ? "Results calculated by Verilog simulation."
+                : "Waiting for votes...";
+        }
+
+        async function resetElection() {
+            try {
+                const response = await fetch("/reset", {
+                    method: "POST"
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.error || "Reset failed");
+                }
+
+                updateDashboard(data);
+
+            } catch (error) {
+                alert("Error: " + error.message);
+            }
+        }
+
+        async function loadResults() {
+            try {
+                const response = await fetch("/results");
+                const data = await response.json();
+
+                if (response.ok) {
+                    updateDashboard(data);
+                }
+            } catch (error) {
+                console.error(error);
+            }
+        }
+
+        loadResults();
+
+    </script>
+
+</body>
+</html>
