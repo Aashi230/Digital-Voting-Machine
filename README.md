@@ -1,4 +1,4 @@
-# ⚡ Digital Voting Machine
+# ⚡ Electra - Digital Voting Machine
 
 A Verilog-based Digital Electronics project that demonstrates a simple voting system using digital logic, simulation and an interactive web interface.
 
